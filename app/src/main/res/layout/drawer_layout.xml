@@ -1,4 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -75,4 +77,12 @@
         android:layout_height="75dp"
         android:background="@android:drawable/screen_background_dark_transparent"
         android:layout_alignParentBottom="true" />
+
+    <ImageView
+        android:id="@+id/qrcode_view"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/qrcode_view"
+        android:src="@android:color/holo_green_dark" />
 </RelativeLayout>
