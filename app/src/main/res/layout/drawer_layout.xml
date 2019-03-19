@@ -82,6 +82,8 @@
         android:id="@+id/qrcode_view"
         android:layout_width="75dp"
         android:layout_height="75dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="30dp"
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/qrcode_view"
         android:src="@android:color/holo_green_dark" />
