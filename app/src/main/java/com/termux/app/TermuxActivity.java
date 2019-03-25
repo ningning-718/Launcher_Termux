@@ -51,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -265,6 +266,28 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         } catch (WriterException e) {
             e.printStackTrace();
         }
+        Button buttonStop = findViewById(R.id.btn_stop);
+        buttonStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                // Do something
+                SharpAIRunnable startRunnableStop = new SharpAIRunnable(HOME_PATH+"/DeepCamera/stop_all.sh");
+                sharpAIHandler.postDelayed(startRunnableStop, 100);
+            }
+        });
+
+        Button buttonStart = findViewById(R.id.btn_start);
+        buttonStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                // Do something
+                SharpAIRunnable startRunnableStart = new SharpAIRunnable(HOME_PATH+"/DeepCamera/start_service.sh");
+                sharpAIHandler.postDelayed(startRunnableStart, 100);
+            }
+        });
+
         ViewGroup.LayoutParams layoutParams = viewPager.getLayoutParams();
         layoutParams.height = layoutParams.height * mSettings.mExtraKeys.length;
         viewPager.setLayoutParams(layoutParams);

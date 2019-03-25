@@ -50,6 +50,8 @@
   <string name="qrcode_view">qrcode_view</string>
   <string name="arch_warning_text">Currently only support 64bit ARM CPU for DeepCamera development mode</string>
   <string name="dialog_if_run_text">Do you want to start DeepCamera services?</string>
+  <string name="button_stop_text">Stop</string>
+  <string name="button_start_text">Start</string>
   <string name="dialog_yes">Yes</string>
   <string name="dialog_no">No</string>
   <string name="dialog_confirm">Confirm</string>

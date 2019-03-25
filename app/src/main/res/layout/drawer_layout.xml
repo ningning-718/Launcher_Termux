@@ -87,4 +87,23 @@
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/qrcode_view"
         android:src="@android:color/holo_green_dark" />
+
+    <Button
+        android:id="@+id/btn_stop"
+        style="@android:style/Widget.DeviceDefault.Light.Button.Inset"
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="120dp"
+        android:layout_marginRight="30dp"
+        android:text="@string/button_stop_text" />
+    <Button
+        android:id="@+id/btn_start"
+        style="@android:style/Widget.DeviceDefault.Light.Button.Inset"
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="170dp"
+        android:layout_marginRight="30dp"
+        android:text="@string/button_start_text" />
 </RelativeLayout>
