@@ -48,4 +48,10 @@
   <string name="file_received_edit_button">Edit</string>
   <string name="file_received_open_folder_button">Open folder</string>
   <string name="qrcode_view">qrcode_view</string>
+  <string name="arch_warning_text">Currently only support 64bit ARM CPU for DeepCamera development mode</string>
+  <string name="dialog_if_run_text">Do you want to start DeepCamera services?</string>
+  <string name="dialog_yes">Yes</string>
+  <string name="dialog_no">No</string>
+  <string name="dialog_confirm">Confirm</string>
+  <string name="dialog_arch_warning_title">CPU not supported</string>
 </resources>

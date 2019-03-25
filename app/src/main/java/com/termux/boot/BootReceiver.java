@@ -13,13 +13,15 @@ import android.util.Log;
 import java.io.File;
 import java.util.Arrays;
 
+import static com.termux.app.TermuxService.HOME_PATH;
+
 public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (!Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) return;
 
-        @SuppressLint("SdCardPath") final String BOOT_SCRIPT_PATH = "/data/data/com.termux/files/home/.termux/boot";
+        @SuppressLint("SdCardPath") final String BOOT_SCRIPT_PATH = HOME_PATH+"/.termux/boot";
         final File BOOT_SCRIPT_DIR = new File(BOOT_SCRIPT_PATH);
         File[] files = BOOT_SCRIPT_DIR.listFiles();
         if (files == null) files = new File[0];

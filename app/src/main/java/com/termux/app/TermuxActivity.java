@@ -5,12 +5,14 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -86,6 +88,8 @@ import java.util.regex.Pattern;
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
 import static com.termux.app.TermuxInstaller.determineTermuxArchName;
+import static com.termux.app.TermuxService.FILES_PATH;
+import static com.termux.app.TermuxService.HOME_PATH;
 
 /**
  * A terminal emulator activity.
@@ -147,8 +151,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     int mBellSoundId;
 
     public class SharpAIRunnable implements Runnable {
-        public final String CWD = "/data/data/com.termux/files/home/runtime";
-        public final String SCRIPT_PATH = "/data/data/com.termux/files/usr/bin/bash";
+        public final String CWD = HOME_PATH+"/DeepCamera";
+        public final String SCRIPT_PATH = FILES_PATH+"/usr/bin/bash";
         private String scriptPath = null;
 
         public SharpAIRunnable(String path) {
@@ -169,9 +173,6 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     Handler sharpAIHandler = new Handler();
 
-    //String archName = determineTermuxArchName();
-    //SharpAIRunnable startRunnable = new SharpAIRunnable("/data/data/com.termux/files/home/runtime/start_"+archName+".sh");
-
     private final BroadcastReceiver mBroadcastReceiever = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -190,8 +191,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     void checkForFontAndColors() {
         try {
-            @SuppressLint("SdCardPath") File fontFile = new File("/data/data/com.termux/files/home/.termux/font.ttf");
-            @SuppressLint("SdCardPath") File colorsFile = new File("/data/data/com.termux/files/home/.termux/colors.properties");
+            @SuppressLint("SdCardPath") File fontFile = new File(HOME_PATH + "/.termux/font.ttf");
+            @SuppressLint("SdCardPath") File colorsFile = new File(HOME_PATH + "/.termux/colors.properties");
 
             final Properties props = new Properties();
             if (colorsFile.isFile()) {
@@ -359,7 +360,72 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         mBellSoundId = mBellSoundPool.load(this, R.raw.bell, 1);
 
-        //sharpAIHandler.postDelayed(startRunnable, 5000);
+        String archName = determineTermuxArchName();
+        if(!archName.equals("aarch64")){
+            showARM32Warning();
+            return;
+        }
+        if(checkIfHasDeepCameraDevFile() == true){
+            Log.d(EmulatorDebug.LOG_TAG,"we have development environment");
+            askIfRunDeepCameraService();
+            return;
+        }
+    }
+    private Boolean checkIfHasDeepCameraDevFile(){
+        File file = new File(HOME_PATH+"/DeepCamera/start_service.sh");
+        return file.exists();
+    }
+    private void askIfRunDeepCameraService(){
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(TermuxActivity.this);
+        builder1.setMessage(R.string.dialog_if_run_text);
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+            R.string.dialog_yes,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+
+                    SharpAIRunnable startRunnable = new SharpAIRunnable(HOME_PATH+"/DeepCamera/start_service.sh");
+                    sharpAIHandler.postDelayed(startRunnable, 5000);
+                    dialog.cancel();
+                }
+            });
+
+        builder1.setNegativeButton(
+            R.string.dialog_no,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+    }
+
+    private void showARM32Warning(){
+        /*
+        final Dialog dialog = new Dialog(TermuxActivity.this); // Context, this, etc.
+        dialog.setContentView(R.layout.dialog_arch_warning);
+        dialog.setTitle(R.string.dialog_arch_warning_title);
+        dialog.show();
+        */
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TermuxActivity.this);
+        builder.setMessage(R.string.arch_warning_text);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(
+            R.string.dialog_confirm,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    Log.i(EmulatorDebug.LOG_TAG,"Yes for arch warning");
+                    dialog.cancel();
+                }
+            });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
     Bitmap encodeAsBitmap(String str,int width,int height) throws WriterException {
         BitMatrix result;
@@ -681,7 +747,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         return UDID.toLowerCase();
     }
     void addNewSession(boolean failSafe, String sessionName) {
-        String homePath = TermuxService.HOME_PATH;
+        String homePath = HOME_PATH;
         File roSerialFile = new File(homePath,".ro_serialno");
         if(!roSerialFile.exists()){
             FileOutputStream stream = null;
