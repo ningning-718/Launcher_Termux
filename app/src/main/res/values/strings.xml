@@ -56,4 +56,10 @@
   <string name="dialog_no">No</string>
   <string name="dialog_confirm">Confirm</string>
   <string name="dialog_arch_warning_title">CPU not supported</string>
+
+  <string name="sharpai_install_title">SharpAI system install</string>
+  <string name="sharpai_install_msg">Do you want to install SharpAI system?</string>
+  <string name="sharpai_dialog_abort">Abort</string>
+  <string name="sharpai_dialog_ok">OK</string>
+  <string name="sharpai_extract_body">Extracting…</string>
 </resources>
