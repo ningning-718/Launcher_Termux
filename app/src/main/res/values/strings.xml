@@ -65,7 +65,8 @@
       \nKeep screen on for better wifi signaling please :)</string>
   <string name="sharpai_dialog_abort">Cancel</string>
   <string name="sharpai_dialog_ok">Install</string>
-  <string name="sharpai_extract_body">Extracting…</string>
+  <string name="sharpai_extract_body">Extracting…\nPlease allow 10-20 minutes to extract DeepCamera system...
+      \nIf it happen to about during this procedure, suggest to remove and install again to have full system successfully setup.</string>
   <string name="decompress_success_text">Success: decompress of DeepCamera development environment</string>
 
 </resources>

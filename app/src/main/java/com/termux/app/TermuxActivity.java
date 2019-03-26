@@ -81,6 +81,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
@@ -162,7 +163,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     /**
      * Async Task to download file from URL
      */
-    private static class DownloadFile extends AsyncTask<String, String, String> {
+    private class DownloadFile extends AsyncTask<String, String, String> {
 
         private ProgressDialog progressDialog;
         private String fileName;
@@ -246,8 +247,15 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             } catch (Exception e) {
                 Log.e("Error: ", e.getMessage());
             }
-
             return "Something went wrong";
+
+            //Debug only code:
+            //Extract file name from URL
+            //fileName = f_url[0].substring(f_url[0].lastIndexOf('/') + 1, f_url[0].length());
+
+            //External directory path to save file
+            //folder = Environment.getExternalStorageDirectory() + File.separator + "sharpaidownload/";
+            //return "" + folder + fileName;
         }
 
         /**
@@ -277,7 +285,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                 public void run() {
                     try {
                         try {
-                            String tarCmd = "busybox tar -xmf " + downloadedFile + " -C " + TermuxService.FILES_PATH + "/\n";
+                            String tarCmd = TermuxService.FILES_PATH+"/usr/bin/busybox tar -xmf " + downloadedFile + " -C " + TermuxService.FILES_PATH + "/\n";
                             Process untar = Runtime.getRuntime().exec(tarCmd);
                             DataOutputStream outputStream = new DataOutputStream(untar.getOutputStream());
 
@@ -286,20 +294,23 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                             untar.waitFor();
                         }catch(IOException e){
                             e.printStackTrace();
-                            TermuxInstaller.deleteFile(downloadedFile);
+                            //TermuxInstaller.deleteFile(downloadedFile);
                             throw new Exception(e);
                         }catch(InterruptedException e){
                             e.printStackTrace();
-                            TermuxInstaller.deleteFile(downloadedFile);
+                            //TermuxInstaller.deleteFile(downloadedFile);
                             throw new Exception(e);
                         } finally {
-                            TermuxInstaller.deleteFile(downloadedFile);
+                            //TermuxInstaller.deleteFile(downloadedFile);
                             Log.i(EmulatorDebug.LOG_TAG, "Decompress of deep camera dev runtime done");
-                            try {
-                                Toast.makeText(activity,R.string.decompress_success_text, Toast.LENGTH_LONG).show();
-                            } catch (WindowManager.BadTokenException e1) {
-                                // Activity already dismissed - ignore.
-                            }
+                            activity.runOnUiThread(() -> {
+                                try {
+                                    Toast.makeText(activity,R.string.decompress_success_text, Toast.LENGTH_LONG).show();
+                                    askIfRunDeepCameraService();
+                                } catch (WindowManager.BadTokenException e1) {
+                                    // Activity already dismissed - ignore.
+                                }
+                            });
                         };
                     } catch (final Exception e) {
                         e.printStackTrace();
@@ -307,7 +318,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                         activity.runOnUiThread(() -> {
                             try {
                                 Toast.makeText(activity,
-                                    "extract file " + downloadedFile + "failed!", Toast.LENGTH_LONG).show();
+                                    "Can't decompress file " + downloadedFile + ".", Toast.LENGTH_LONG).show();
                             } catch (WindowManager.BadTokenException e1) {
                                 // Activity already dismissed - ignore.
                             }
