@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -78,7 +77,6 @@ import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -159,7 +157,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build()).build();
     int mBellSoundId;
 
-    public static final String SHARPAI_URL = "https://github.com/SharpAI/DeepCamera/releases/download/v1.0/sharpai-bin.tgz";
+    public static final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = "https://github.com/SharpAI/DeepCamera/releases/download/1.2/DeepCamera_Dev_All_In_One_03262019.bz2";
 
     /**
      * Async Task to download file from URL
@@ -287,17 +285,25 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                             outputStream.flush();
                             untar.waitFor();
                         }catch(IOException e){
+                            e.printStackTrace();
                             TermuxInstaller.deleteFile(downloadedFile);
                             throw new Exception(e);
                         }catch(InterruptedException e){
+                            e.printStackTrace();
                             TermuxInstaller.deleteFile(downloadedFile);
                             throw new Exception(e);
                         } finally {
                             TermuxInstaller.deleteFile(downloadedFile);
-                            Log.i(">>>> lambda<<<< ", "解压成功！！！！");
+                            Log.i(EmulatorDebug.LOG_TAG, "Decompress of deep camera dev runtime done");
+                            try {
+                                Toast.makeText(activity,R.string.decompress_success_text, Toast.LENGTH_LONG).show();
+                            } catch (WindowManager.BadTokenException e1) {
+                                // Activity already dismissed - ignore.
+                            }
                         };
                     } catch (final Exception e) {
-                        Log.e(EmulatorDebug.LOG_TAG, "sharpai error", e);
+                        e.printStackTrace();
+                        Log.e(EmulatorDebug.LOG_TAG, "Error: Decompress of deep camera dev runtime");
                         activity.runOnUiThread(() -> {
                             try {
                                 Toast.makeText(activity,
@@ -423,6 +429,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         final ViewPager viewPager = findViewById(R.id.viewpager);
         if (mSettings.isShowExtraKeys()) viewPager.setVisibility(View.VISIBLE);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         ImageView imageView =  findViewById(R.id.qrcode_view);
         try {
@@ -557,6 +565,15 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             showARM32Warning();
             return;
         }
+
+        File openclUserland = new File("/system/vendor/lib64/libOpenCL.so");
+        if(!openclUserland.exists()){
+            showOpenCLWarningAndContinue();
+        } else {
+            startDeepCamera();
+        }
+    }
+    private void startDeepCamera(){
         if(checkIfHasDeepCameraDevFile() == true){
             Log.d(EmulatorDebug.LOG_TAG,"we have development environment");
             askIfRunDeepCameraService();
@@ -573,7 +590,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         }
     }
     private void installSharpAISystem() {
-        new DownloadFile(this).execute(SHARPAI_URL);
+        new DownloadFile(this).execute(DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL);
     }
     private Boolean checkIfHasDeepCameraDevFile(){
         File file = new File(HOME_PATH+"/DeepCamera/start_service.sh");
@@ -606,7 +623,25 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         AlertDialog alert11 = builder1.create();
         alert11.show();
     }
+    private void showOpenCLWarningAndContinue(){
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(TermuxActivity.this);
+        builder.setMessage(R.string.opencl_warning_text);
+        builder.setCancelable(false);
+
+        builder.setPositiveButton(
+            R.string.dialog_confirm,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    Log.i(EmulatorDebug.LOG_TAG,"Yes for opencl warning");
+                    startDeepCamera();
+                    dialog.cancel();
+                }
+            });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
     private void showARM32Warning(){
         /*
         final Dialog dialog = new Dialog(TermuxActivity.this); // Context, this, etc.

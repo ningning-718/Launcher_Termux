@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-   <string name="application_name">Termux</string>
+   <string name="application_name">DeepCamera on Termux</string>
    <string name="shared_user_label">Termux user</string>
    <string name="new_session">New session</string>
    <string name="new_session_failsafe">Failsafe</string>
@@ -48,7 +48,8 @@
   <string name="file_received_edit_button">Edit</string>
   <string name="file_received_open_folder_button">Open folder</string>
   <string name="qrcode_view">qrcode_view</string>
-  <string name="arch_warning_text">Currently only support 64bit ARM CPU for DeepCamera development mode</string>
+  <string name="arch_warning_text">Currently only support ARM 64bit Android for DeepCamera development mode</string>
+  <string name="opencl_warning_text">No OpenCL/GPU support on your system, performance/accuracy reduces heavily, use for evaluation only please.</string>
   <string name="dialog_if_run_text">Do you want to start DeepCamera services?</string>
   <string name="button_stop_text">Stop</string>
   <string name="button_start_text">Start</string>
@@ -57,9 +58,14 @@
   <string name="dialog_confirm">Confirm</string>
   <string name="dialog_arch_warning_title">CPU not supported</string>
 
-  <string name="sharpai_install_title">SharpAI system install</string>
-  <string name="sharpai_install_msg">Do you want to install SharpAI system?</string>
-  <string name="sharpai_dialog_abort">Abort</string>
-  <string name="sharpai_dialog_ok">OK</string>
+  <string name="sharpai_install_title">Want to install DeepCamera development environment?</string>
+  <string name="sharpai_install_msg">Tap Install to install DeepCamera development environment.
+      \nWill download 742MB data to your external storage, make sure you have wifi connected or will cost your mobile bandwidth.
+      \nNeed 2.8GB storage for system installation on your data storage.
+      \nKeep screen on for better wifi signaling please :)</string>
+  <string name="sharpai_dialog_abort">Cancel</string>
+  <string name="sharpai_dialog_ok">Install</string>
   <string name="sharpai_extract_body">Extracting…</string>
+  <string name="decompress_success_text">Success: decompress of DeepCamera development environment</string>
+
 </resources>
