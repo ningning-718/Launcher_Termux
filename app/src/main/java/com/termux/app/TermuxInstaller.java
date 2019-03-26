@@ -56,168 +56,8 @@ import java.util.zip.ZipInputStream;
  * (5.2) For every other zip entry, extract it into $STAGING_PREFIX and set execute permissions if necessary.
  */
 final class TermuxInstaller {
-    public static final String SHARPAI_URL = "https://github.com/SharpAI/DeepCamera/releases/download/v1.0/sharpai-bin.tgz";
 
-    /**
-     * Async Task to download file from URL
-     */
-    private static class DownloadFile extends AsyncTask<String, String, String> {
-
-        private ProgressDialog progressDialog;
-        private String fileName;
-        private String folder;
-        private boolean isDownloaded;
-        private Activity activity = null;
-
-        public DownloadFile(final Activity activity) {
-            super();
-            this.activity = activity;
-        }
-
-        /**
-         * Before starting background thread
-         * Show Progress Bar Dialog
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            this.progressDialog = new ProgressDialog(activity);
-            this.progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            this.progressDialog.setCancelable(false);
-            this.progressDialog.show();
-        }
-
-        /**
-         * Downloading file in background thread
-         */
-        @Override
-        protected String doInBackground(String... f_url) {
-            int count;
-            try {
-                URL url = new URL(f_url[0]);
-                URLConnection connection = url.openConnection();
-                connection.connect();
-                // getting file length
-                int lengthOfFile = connection.getContentLength();
-
-                // input stream to read file - with 8k buffer
-                InputStream input = new BufferedInputStream(url.openStream(), 8192);
-
-                //Extract file name from URL
-                fileName = f_url[0].substring(f_url[0].lastIndexOf('/') + 1, f_url[0].length());
-
-                //External directory path to save file
-                folder = Environment.getExternalStorageDirectory() + File.separator + "sharpaidownload/";
-
-                //Create androiddeft folder if it does not exist
-                File directory = new File(folder);
-
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-
-                // Output stream to write file
-                OutputStream output = new FileOutputStream(folder + fileName);
-
-                byte data[] = new byte[1024];
-
-                long total = 0;
-
-                while ((count = input.read(data)) != -1) {
-                    total += count;
-                    // publishing the progress....
-                    // After this onProgressUpdate will be called
-                    publishProgress("" + (int) ((total * 100) / lengthOfFile));
-                    Log.d("sharpai", "Progress: " + (int) ((total * 100) / lengthOfFile));
-
-                    // writing data to file
-                    output.write(data, 0, count);
-                }
-
-                // flushing output
-                output.flush();
-
-                // closing streams
-                output.close();
-                input.close();
-                return "" + folder + fileName;
-
-            } catch (Exception e) {
-                Log.e("Error: ", e.getMessage());
-            }
-
-            return "Something went wrong";
-        }
-
-        /**
-         * Updating progress bar
-         */
-        protected void onProgressUpdate(String... progress) {
-            // setting progress percentage
-            progressDialog.setProgress(Integer.parseInt(progress[0]));
-        }
-
-
-        @Override
-        protected void onPostExecute(String downloadedFile) {
-            // dismiss the dialog after the file was downloaded
-            this.progressDialog.dismiss();
-
-            // Display File path after downloading
-            Toast.makeText(activity,
-                "downloaded to " + downloadedFile, Toast.LENGTH_LONG).show();
-            extractDownloadedFile(downloadedFile);
-        }
-
-        private void extractDownloadedFile(String downloadedFile) {
-            final ProgressDialog progress = ProgressDialog.show(activity, null, activity.getString(R.string.sharpai_extract_body), true, false);
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        try {
-                            String tarCmd = "busybox tar -xmf " + downloadedFile + " -C " + TermuxService.FILES_PATH + "/\n";
-                            Process untar = Runtime.getRuntime().exec(tarCmd);
-                            DataOutputStream outputStream = new DataOutputStream(untar.getOutputStream());
-
-                            outputStream.writeBytes("exit\n");
-                            outputStream.flush();
-                            untar.waitFor();
-                        }catch(IOException e){
-                            deleteFile(downloadedFile);
-                            throw new Exception(e);
-                        }catch(InterruptedException e){
-                            deleteFile(downloadedFile);
-                            throw new Exception(e);
-                        } finally {
-                            deleteFile(downloadedFile);
-                            Log.i(">>>> lambda<<<< ", "解压成功！！！！");
-                        };
-                    } catch (final Exception e) {
-                        Log.e(EmulatorDebug.LOG_TAG, "sharpai error", e);
-                        activity.runOnUiThread(() -> {
-                            try {
-                                Toast.makeText(activity,
-                                    "extract file " + downloadedFile + "failed!", Toast.LENGTH_LONG).show();
-                            } catch (WindowManager.BadTokenException e1) {
-                                // Activity already dismissed - ignore.
-                            }
-                        });
-                    } finally {
-                        activity.runOnUiThread(() -> {
-                            try {
-                                progress.dismiss();
-                            } catch (RuntimeException e) {
-                                // Activity already dismissed - ignore.
-                            }
-                        });
-                    };
-                }
-            }.start();
-        }
-    }
-
-    private static boolean deleteFile(String fileName) {
+    public static boolean deleteFile(String fileName) {
         File file = new File(fileName);
         // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
@@ -433,14 +273,6 @@ final class TermuxInstaller {
                     activity.runOnUiThread(() -> {
                         try {
                             progress.dismiss();
-
-                            new AlertDialog.Builder(activity).setTitle(R.string.sharpai_install_title).setMessage(R.string.sharpai_install_msg)
-                                .setNegativeButton(R.string.sharpai_dialog_abort, (dialog, which) -> {
-                                    dialog.dismiss();
-                                }).setPositiveButton(R.string.sharpai_dialog_ok, (dialog, which) -> {
-                                dialog.dismiss();
-                                TermuxInstaller.installSharpAISystem(activity);
-                            }).show();
                         } catch (RuntimeException e) {
                             // Activity already dismissed - ignore.
                         }
@@ -448,10 +280,6 @@ final class TermuxInstaller {
                 };
             }
         }.start();
-    }
-
-    private static void installSharpAISystem(Activity activity) {
-        new DownloadFile(activity).execute(SHARPAI_URL);
     }
 
     /** Get bootstrap zip url for this systems cpu architecture. */
