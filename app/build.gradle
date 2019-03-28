@@ -18,6 +18,21 @@ android {
         versionName "0.65"
     }
 
+    packagingOptions {
+        exclude 'lib/armeabi-v7a/libRSSupport.so'
+        exclude 'lib/arm64-v8a/librsjni.so'
+        exclude 'lib/arm64-v8a/libRSSupport.so'
+        exclude 'lib/x86_64/librsjni_androidx.so'
+        exclude 'lib/x86/librsjni_androidx.so'
+        exclude 'lib/x86/libRSSupport.so'
+        exclude 'lib/arm64-v8a/librsjni_androidx.so'
+        exclude 'lib/armeabi-v7a/librsjni_androidx.so'
+        exclude 'lib/x86_64/libRSSupport.so'
+        exclude 'lib/x86/librsjni.so'
+        exclude 'lib/x86_64/librsjni.so'
+        exclude 'lib/armeabi-v7a/librsjni.so'
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -34,4 +49,7 @@ android {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
+    implementation project(':aicameraapp')
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
 }
