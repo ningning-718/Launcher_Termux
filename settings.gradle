@@ -1,1 +1,1 @@
-include ':app', ':terminal-emulator', ':terminal-view'
+include ':app', ':terminal-emulator', ':terminal-view', ':openCVLibrary341', ':nativeLib', ':magicfilter', ':rembrandtAndroid', ':easyrs', ':sharpai-lib'
