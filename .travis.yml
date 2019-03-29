@@ -27,7 +27,7 @@ addons:
     project:
       name: "SharpAI/Launcher_Termux"
       description: "Terminal emulator and Linux environment for Android"
-    notification_email: fredrik@fornwall.net
+    notification_email: solderzzc@gmail.com
     build_command_prepend: "./gradlew clean"
     build_command: "./gradlew build"
     branch_pattern: master
