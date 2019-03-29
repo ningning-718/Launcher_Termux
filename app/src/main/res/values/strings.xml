@@ -51,6 +51,10 @@
   <string name="arch_warning_text">Currently only support ARM 64bit Android for DeepCamera development mode</string>
   <string name="opencl_warning_text">No OpenCL/GPU support on your system, performance/accuracy reduces heavily, use for evaluation only please.</string>
   <string name="dialog_if_run_text">Do you want to start DeepCamera services?</string>
+  <string name="dialog_if_testing_with_builtin_camera_text">\nDeepCamera platform is starting...\n\n
+      \nDo you want to use Android Camera for testing?
+      \nIt is better to wait for 1-2 minutes for DeepCamera system startup, then tap YES to start the Camera preview demo.
+      \nThis application is designed for evaluating DeepCamera platform.</string>
   <string name="button_stop_text">Stop</string>
   <string name="button_start_text">Start</string>
   <string name="dialog_yes">Yes</string>

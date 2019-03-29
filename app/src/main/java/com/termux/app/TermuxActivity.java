@@ -55,6 +55,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -72,6 +73,8 @@ import com.termux.terminal.TerminalSession;
 import com.termux.terminal.TerminalSession.SessionChangedCallback;
 import com.termux.terminal.TextStyle;
 import com.termux.view.TerminalView;
+
+import org.sharpai.aicamera.CameraControl;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
@@ -159,6 +162,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     int mBellSoundId;
 
     public static final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = "https://github.com/SharpAI/DeepCamera/releases/download/1.2/DeepCamera_Dev_All_In_One_03262019.bz2";
+
+    CameraControl mCameraControl;
 
     /**
      * Async Task to download file from URL
@@ -436,7 +441,6 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         mTerminalView.setOnKeyListener(new TermuxViewClient(this));
 
         mTerminalView.setTextSize(mSettings.getFontSize());
-        mTerminalView.requestFocus();
 
         final ViewPager viewPager = findViewById(R.id.viewpager);
         if (mSettings.isShowExtraKeys()) viewPager.setVisibility(View.VISIBLE);
@@ -462,6 +466,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                 // Do something
                 SharpAIRunnable startRunnableStop = new SharpAIRunnable(HOME_PATH+"/DeepCamera/stop_all.sh");
                 sharpAIHandler.postDelayed(startRunnableStop, 100);
+                stopCameraPreview();
             }
         });
 
@@ -473,8 +478,10 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
                 // Do something
                 SharpAIRunnable startRunnableStart = new SharpAIRunnable(HOME_PATH+"/DeepCamera/start_service.sh");
                 sharpAIHandler.postDelayed(startRunnableStart, 100);
+                startCameraPreview();
             }
         });
+        buttonStart.setVisibility(View.GONE);
 
         ViewGroup.LayoutParams layoutParams = viewPager.getLayoutParams();
         layoutParams.height = layoutParams.height * mSettings.mExtraKeys.length;
@@ -583,6 +590,15 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         } else {
             startDeepCamera();
         }
+        //startCameraPreview();
+    }
+    private void startCameraPreview(){
+        FrameLayout preview = findViewById(R.id.camera_preview);
+        ImageView imageView =  findViewById(R.id.qrcode_view);
+        mCameraControl = new CameraControl(this,preview,imageView);
+    }
+    private void stopCameraPreview(){
+        mCameraControl.stop();
     }
     private void startDeepCamera(){
         if(checkIfHasDeepCameraDevFile() == true){
@@ -607,7 +623,44 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         File file = new File(HOME_PATH+"/DeepCamera/start_service.sh");
         return file.exists();
     }
+    private void askIfRunCameraPreview(){
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(TermuxActivity.this);
+        builder1.setMessage(R.string.dialog_if_testing_with_builtin_camera_text);
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+            R.string.dialog_yes,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    startCameraPreview();
+                    dialog.cancel();
+                }
+            });
+
+        builder1.setNegativeButton(
+            R.string.dialog_no,
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    mTerminalView.requestFocus();
+                    dialog.cancel();
+                }
+            });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
+
+    }
+    private void startDeepCameraService(){
+
+        SharpAIRunnable startRunnable = new SharpAIRunnable(HOME_PATH+"/DeepCamera/start_service.sh");
+        sharpAIHandler.postDelayed(startRunnable, 100);
+
+    }
     private void askIfRunDeepCameraService(){
+        startDeepCameraService();
+        askIfRunCameraPreview();
+        /*
         AlertDialog.Builder builder1 = new AlertDialog.Builder(TermuxActivity.this);
         builder1.setMessage(R.string.dialog_if_run_text);
         builder1.setCancelable(true);
@@ -616,10 +669,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             R.string.dialog_yes,
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-
-                    SharpAIRunnable startRunnable = new SharpAIRunnable(HOME_PATH+"/DeepCamera/start_service.sh");
-                    sharpAIHandler.postDelayed(startRunnable, 5000);
-                    dialog.cancel();
+dialog.cancel();
+                    startDeepCameraService();
+                    askIfRunCameraPreview();
                 }
             });
 
@@ -633,6 +685,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         AlertDialog alert11 = builder1.create();
         alert11.show();
+        */
     }
     private void showOpenCLWarningAndContinue(){
 

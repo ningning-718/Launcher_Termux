@@ -1,9 +1,8 @@
-plugins {
-    id "com.jfrog.bintray" version "1.7.3"
-    id "com.github.dcendents.android-maven" version "2.0"
-}
+
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
 ext {
     bintrayName = 'terminal-emulator'
@@ -24,13 +23,20 @@ android {
         targetSdkVersion 28
 
         externalNativeBuild {
-            ndkBuild {
-                cFlags "-std=c11", "-Wall", "-Wextra", "-Werror", "-Os", "-fno-stack-protector", "-Wl,--gc-sections"
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-21',
+                    '-DANDROID_TOOLCHAIN=clang',
+                    '-DANDROID_STL=stlport_static'
             }
         }
-
         ndk {
-            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+            abiFilters 'armeabi-v7a' //,'arm64-v8a','x86','x86_64'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
         }
     }
 
@@ -38,12 +44,6 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    externalNativeBuild {
-        ndkBuild {
-            path "src/main/jni/Android.mk"
         }
     }
 
