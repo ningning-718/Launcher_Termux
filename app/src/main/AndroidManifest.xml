@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.termux"
+    package="org.sharpai.termux"
     android:installLocation="internalOnly"
-    android:sharedUserId="com.termux"
+    android:sharedUserId="org.sharpai"
     android:sharedUserLabel="@string/shared_user_label" >
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -39,7 +39,7 @@
         <meta-data android:name="android.max_aspect" android:value="10.0" />
 
         <activity
-            android:name="com.termux.app.TermuxActivity"
+            android:name="org.sharpai.app.TermuxActivity"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
@@ -62,17 +62,17 @@
         </activity>
 
         <activity
-            android:name="com.termux.app.TermuxHelpActivity"
+            android:name="org.sharpai.app.TermuxHelpActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Material.Light.DarkActionBar"
-            android:parentActivityName=".app.TermuxActivity"
+            android:parentActivityName="org.sharpai.app.TermuxActivity"
             android:resizeableActivity="true"
             android:label="@string/application_name" />
 
         <activity
-            android:name="com.termux.filepicker.TermuxFileReceiverActivity"
+            android:name="org.sharpai.filepicker.TermuxFileReceiverActivity"
             android:label="@string/application_name"
-            android:taskAffinity="com.termux.filereceiver"
+            android:taskAffinity="org.sharpai.termux.filereceiver"
             android:excludeFromRecents="true"
             android:resizeableActivity="true"
             android:noHistory="true">
@@ -102,7 +102,7 @@
 
         <activity-alias
             android:name=".HomeActivity"
-            android:targetActivity="com.termux.app.TermuxActivity">
+            android:targetActivity="org.sharpai.app.TermuxActivity">
 
             <!-- Launch activity automatically on boot on Android Things devices -->
             <intent-filter>
@@ -112,32 +112,21 @@
             </intent-filter>
         </activity-alias>
 
-        <provider
-            android:name=".filepicker.TermuxDocumentsProvider"
-            android:authorities="com.termux.documents"
-            android:grantUriPermissions="true"
-            android:exported="true"
-            android:permission="android.permission.MANAGE_DOCUMENTS">
-            <intent-filter>
-                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
-            </intent-filter>
-        </provider>
-
         <service
-            android:name="com.termux.app.TermuxService"
+            android:name="org.sharpai.app.TermuxService"
             android:stopWithTask="false"
             android:exported="false" />
 
-        <receiver android:name=".app.TermuxOpenReceiver" />
+        <receiver android:name="org.sharpai.app.TermuxOpenReceiver" />
 
-        <provider android:authorities="com.termux.files"
+        <provider android:authorities="org.sharpai.termux.files"
                   android:readPermission="android.permission.permRead"
                   android:exported="true"
                   android:grantUriPermissions="true"
-                  android:name="com.termux.app.TermuxOpenReceiver$ContentProvider" />
+                  android:name="org.sharpai.app.TermuxOpenReceiver$ContentProvider" />
 
         <receiver
-            android:name="com.termux.boot.BootReceiver"
+            android:name="org.sharpai.boot.BootReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
@@ -148,7 +137,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name="com.termux.boot.BootJobService"
+            android:name="org.sharpai.boot.BootJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />

@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.termux"
+        applicationId "org.sharpai"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 65
