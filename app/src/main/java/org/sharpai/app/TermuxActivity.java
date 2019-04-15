@@ -471,7 +471,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             public void onClick(View view)
             {
                 // Do something
-                SharpAIRunnable startRunnableStop = new SharpAIRunnable(HOME_PATH+"/DeepCamera/stop_all.sh");
+                SharpAIRunnable startRunnableStop = new SharpAIRunnable(FILES_PATH+"/termuxroot/home/DeepCamera/stop_all.sh");
                 sharpAIHandler.postDelayed(startRunnableStop, 100);
                 stopCameraPreview();
             }
