@@ -163,8 +163,8 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
     public static final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = "https://github.com/SharpAI/DeepCamera/releases/download/1.2/DeepCamera_Dev_All_In_One_03262019.bz2";
 
-    CameraControl mCameraControl;
-
+    private CameraControl mCameraControl;
+    private RealtimeRecognition mRT;
     /**
      * Async Task to download file from URL
      */
@@ -597,6 +597,12 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         } else {
             startDeepCamera();
         }
+
+
+        ImageView statusBoard = findViewById(R.id.green_light_view);
+        ImageView personBoard = findViewById(R.id.known_person_view);
+        mRT = new RealtimeRecognition(this,statusBoard,personBoard);
+        mRT.Start();
         //startCameraPreview();
     }
     private void startCameraPreview(){

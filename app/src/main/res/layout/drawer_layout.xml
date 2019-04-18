@@ -81,7 +81,36 @@
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"></FrameLayout>
+        android:layout_height="fill_parent">
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/recognition_toolbox"
+        android:layout_width="100dp"
+        android:layout_height="220dp"
+        android:orientation="vertical"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="130dp"
+        android:layout_alignParentEnd="true">
+
+        <ImageView
+            android:id="@+id/known_person_view"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/control_background"
+            app:srcCompat="@color/control_background"
+            android:contentDescription="TODO" />
+        <TextView
+            android:id="@+id/known_person_text"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
+            android:text="TextView" />
+        <ImageView
+            android:id="@+id/green_light_view"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:srcCompat="@drawable/green_off" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/qrcode_view"
