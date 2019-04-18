@@ -601,7 +601,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
 
         ImageView statusBoard = findViewById(R.id.green_light_view);
         ImageView personBoard = findViewById(R.id.known_person_view);
-        mRT = new RealtimeRecognition(this,statusBoard,personBoard);
+        TextView personTextView = findViewById(R.id.known_person_text);
+        mRT = new RealtimeRecognition(this,statusBoard,
+            personBoard,personTextView);
         mRT.Start();
         //startCameraPreview();
     }

@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
@@ -28,6 +29,9 @@ import org.sharpai.termux.R;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -52,6 +56,7 @@ public class RealtimeRecognition implements MqttCallback {
     private Handler mMainHandler;
     private Context mContext;
     private Picasso mPicasso;
+    private TextView mPersonTextView;
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
@@ -76,11 +81,13 @@ public class RealtimeRecognition implements MqttCallback {
         })
         .build();
 
-    public RealtimeRecognition(Context context,ImageView statusView,ImageView personView) {
+    public RealtimeRecognition(Context context,ImageView statusView,ImageView personView,
+                               TextView textView) {
         //super.onCreate(savedInstanceState);
         mMqttCallback = this;
         mStatusView = statusView;
         mPersonView = personView;
+        mPersonTextView = textView;
         mContext = context;
 
         mPicasso = new Picasso
@@ -112,6 +119,12 @@ public class RealtimeRecognition implements MqttCallback {
         mStatusView.setImageResource(R.drawable.green_off);
     }
     private void SetGreen(){
+        //Format reference:
+        // https://stackoverflow.com/questions/5369682/get-current-time-and-date-on-android
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+
+        String date = df.format(Calendar.getInstance().getTime());
+        mPersonTextView.setText(date);
         mStatusView.setImageResource(R.drawable.green_on);
     }
     private void setKnownPersonImage(String imageUrl){

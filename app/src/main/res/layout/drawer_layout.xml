@@ -87,7 +87,7 @@
     <LinearLayout
         android:id="@+id/recognition_toolbox"
         android:layout_width="100dp"
-        android:layout_height="220dp"
+        android:layout_height="230dp"
         android:orientation="vertical"
         android:layout_marginTop="30dp"
         android:layout_marginRight="130dp"
@@ -100,11 +100,16 @@
             android:background="@color/control_background"
             app:srcCompat="@color/control_background"
             android:contentDescription="TODO" />
+
         <TextView
             android:id="@+id/known_person_text"
             android:layout_width="100dp"
-            android:layout_height="20dp"
-            android:text="TextView" />
+            android:layout_height="30dp"
+            android:background="@android:color/background_dark"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/color_l_ankle"
+            android:textStyle="bold" />
         <ImageView
             android:id="@+id/green_light_view"
             android:layout_width="100dp"
