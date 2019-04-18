@@ -641,6 +641,9 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     startCameraPreview();
+                    getWindow().setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+                    );
                     dialog.cancel();
                 }
             });
