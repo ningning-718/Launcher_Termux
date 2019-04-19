@@ -161,7 +161,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build()).build();
     int mBellSoundId;
 
-    public final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = getResources().getString(R.string.runtime_download_url);
+    public String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL;
 
     private CameraControl mCameraControl;
     private RealtimeRecognition mRT;
@@ -440,7 +440,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-
+        DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = getResources().getString(R.string.runtime_download_url);
         mSettings = new TermuxPreferences(this);
 
         setContentView(R.layout.drawer_layout);
