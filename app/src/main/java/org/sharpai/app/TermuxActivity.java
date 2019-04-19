@@ -161,7 +161,7 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).build()).build();
     int mBellSoundId;
 
-    public static final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = "https://github.com/SharpAI/DeepCamera/releases/download/1.2/DeepCamera_Dev_All_In_One_03262019.bz2";
+    public final String DEEPCAMERA_DEV_ALL_IN_ONE_DOWNLOAD_URL = getResources().getString(R.string.runtime_download_url);
 
     private CameraControl mCameraControl;
     private RealtimeRecognition mRT;
