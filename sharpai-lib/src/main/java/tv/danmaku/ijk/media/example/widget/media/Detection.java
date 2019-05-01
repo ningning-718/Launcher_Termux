@@ -541,6 +541,12 @@ public class Detection {
                 tsEnd = System.currentTimeMillis();
                 Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
 
+                if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == false) {
+                    if (faceStyle.equals("side_face")) {
+                        continue;
+                    }
+                }
+
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
                         .saveFaceToPicturesFolder(mContext, resizedBmp, "face_");
