@@ -559,6 +559,8 @@ public class Detection {
                 personInfo.put("faceBlurry",blurryValue);
                 //bitmap.recycle();
                 //bitmap = null;
+            } else if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == false) {
+                continue;
             }
             Log.v(TAG,"time diff (Save) "+(tsEnd-tsStart));
             if(filename.equals("")){
