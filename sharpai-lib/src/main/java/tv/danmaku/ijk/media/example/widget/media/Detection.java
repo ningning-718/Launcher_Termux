@@ -379,6 +379,18 @@ public class Detection {
         RectF faceRectf = new RectF(left,top,right,bottom);
         return faceRectf;
     }
+    private RectF getFaceRectF(VisionDetRet faceInfo){
+
+        int left, top, right, bottom;
+        int i = 0;
+        left = faceInfo.getLeft();
+        top = faceInfo.getTop();
+        right = faceInfo.getRight();
+        bottom = faceInfo.getBottom();
+
+        RectF faceRectf = new RectF(left,top,right,bottom);
+        return faceRectf;
+    }
     private String calcFaceStyle(int[] faceInfo){
         int left, top, right, bottom;
         int i = 0;
@@ -461,6 +473,7 @@ public class Detection {
 
             if(SHOW_DETECTED_PERSON_FACE_FOR_DEBUG) {
                 mPersonView.setImageBitmap(personBmp);
+                mFaceView.setImageDrawable(null);
             }
 
             int[] face_info = mFaceDetector.predict_image(personBmp);
@@ -483,29 +496,50 @@ public class Detection {
             }
             personInfo.put("faceNum",num);
             if(num > 0){
-                String faceStyle = calcFaceStyle(face_info);
-                Log.d(TAG,"Face style is "+faceStyle);
-                RectF faceRectF = getFaceRectF(face_info);
+
+                /*
+                Code for detect/crop face with dlib
 
                 tsStart = System.currentTimeMillis();
-                Bitmap resizedPersonBmp = mMotionDetection.resizeBmp(personBmp,personBmp.getWidth()/4,personBmp.getHeight()/4);
+                float ratio = 1;
+                if(personBmp.getWidth() >= 400 ){
+                    ratio = personBmp.getWidth()/400;
+                }
+                Bitmap resizedPersonBmp = mMotionDetection.resizeBmp(personBmp,(int) (personBmp.getWidth()/ratio),(int)(personBmp.getHeight()/ratio));
                 List<VisionDetRet> results = mFaceDet.detect(resizedPersonBmp);
-                if (results.size() != 0) {
-                    Log.v(TAG,"face detection got face (FD DLIB) ");
-                    for (final VisionDetRet ret : results) {
 
-                        Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
-                    }
+                if(results.size() != 0){
+                    VisionDetRet ret = results.get(0);
+                    Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
+                    RectF dlibFaceRectF = getFaceRectF(ret);
+                    Bitmap faceBmp = getCropBitmapByCPU(resizedPersonBmp,dlibFaceRectF);
+                    Bitmap resizedBmp = mMotionDetection.resizeBmp(faceBmp,FACE_SAVING_WIDTH,FACE_SAVING_HEIGHT);
+
+                    mFaceView.setImageBitmap(resizedBmp);
                 }
                 tsEnd = System.currentTimeMillis();
-
                 Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
+                */
+
+                RectF faceRectF = getFaceRectF(face_info);
 
                 face_num+=num;
                 Bitmap faceBmp = getCropBitmapByCPU(personBmp,faceRectF);
                 Bitmap resizedBmp = mMotionDetection.resizeBmp(faceBmp,FACE_SAVING_WIDTH,FACE_SAVING_HEIGHT);
 
-                mFaceView.setImageBitmap(resizedBmp);
+                tsStart = System.currentTimeMillis();
+                List<VisionDetRet> results = mFaceDet.detect(resizedBmp);
+                String faceStyle = "side_face";
+                if(results.size() != 0){
+                    VisionDetRet ret = results.get(0);
+                    Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
+
+                    mFaceView.setImageBitmap(resizedBmp);
+                    faceStyle = "front";
+                }
+                Log.d(TAG,"Face style is "+faceStyle);
+                tsEnd = System.currentTimeMillis();
+                Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
 
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
