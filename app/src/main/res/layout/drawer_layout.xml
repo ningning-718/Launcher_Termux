@@ -85,6 +85,33 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/detection_toolbox"
+        android:layout_width="100dp"
+        android:layout_height="330dp"
+        android:orientation="vertical"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="240dp"
+        android:layout_alignParentEnd="true">
+
+        <ImageView
+            android:id="@+id/detected_face_view"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/control_background"
+            app:srcCompat="@color/control_background"
+            android:contentDescription="TODO" />
+
+        <ImageView
+            android:id="@+id/detected_person_view"
+            android:layout_marginTop="30dp"
+            android:layout_width="100dp"
+            android:layout_height="200dp"
+            android:background="@color/control_background"
+            app:srcCompat="@color/control_background"
+            android:contentDescription="TODO" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/recognition_toolbox"
         android:layout_width="100dp"
         android:layout_height="230dp"

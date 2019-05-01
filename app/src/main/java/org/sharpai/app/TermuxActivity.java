@@ -610,7 +610,10 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
     private void startCameraPreview(){
         FrameLayout preview = findViewById(R.id.camera_preview);
         ImageView imageView =  findViewById(R.id.qrcode_view);
-        mCameraControl = new CameraControl(this,preview,imageView);
+        ImageView detectedPersonView =  findViewById(R.id.detected_person_view);
+        ImageView detectedFaceView =  findViewById(R.id.detected_face_view);
+
+        mCameraControl = new CameraControl(this,preview,imageView,detectedPersonView,detectedFaceView);
     }
     private void stopCameraPreview(){
         mCameraControl.stop();

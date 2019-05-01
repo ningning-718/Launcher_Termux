@@ -14,12 +14,16 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v8.renderscript.RenderScript;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.mtcnn_as.FaceDetector;
 import com.sharpai.detector.Classifier;
 import com.sharpai.detector.Detector;
 import com.sharpai.detector.env.ImageUtils;
 import com.sharpai.pim.MotionDetectionRS;
+import com.tzutalin.dlib.Constants;
+import com.tzutalin.dlib.FaceDet;
+import com.tzutalin.dlib.VisionDetRet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,6 +107,12 @@ public class Detection {
     private static final int PROCESS_FRAMES_AFTER_MOTION_DETECTED = 3;
 
     private static final boolean SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA = false;
+
+    private FaceDet mFaceDet;
+
+    private static final boolean SHOW_DETECTED_PERSON_FACE_FOR_DEBUG = true;
+    private ImageView mPersonView;
+    private ImageView mFaceView;
     static {
         if (OpenCVLoader.initDebug()) {
             Log.i(TAG, "OpenCV initialize success");
@@ -110,9 +120,11 @@ public class Detection {
             Log.i(TAG, "OpenCV initialize failed");
         }
     }
-    public Detection(Context context){
+    public Detection(Context context, ImageView detectedPersonView , ImageView detectedFaceView){
 
         mContext = context;
+        mPersonView = detectedPersonView;
+        mFaceView = detectedFaceView;
 
         HandlerThread handlerThread = new HandlerThread("BackgroundThread");
         handlerThread.start();
@@ -151,6 +163,9 @@ public class Detection {
         //mMOG2.setHistory(5);
         //mMOG2.setDetectShadows(false);
         //mMOG2.setComplexityReductionThreshold(0);
+        if(SHOW_DETECTED_PERSON_FACE_FOR_DEBUG){
+            mFaceDet = new FaceDet(Constants.getFaceShapeModelPath());
+        }
     }
     class MyCallback implements Handler.Callback {
 
@@ -437,11 +452,17 @@ public class Detection {
         JSONArray detectInfo = new JSONArray();
 
         for(final Classifier.Recognition recognition:result){
+
             tsStart = System.currentTimeMillis();
 
             RectF rectf = recognition.getLocation();
             Log.d(TAG,"recognition rect: "+rectf.toString());
             Bitmap personBmp = getCropBitmapByCPU(bmp,rectf);
+
+            if(SHOW_DETECTED_PERSON_FACE_FOR_DEBUG) {
+                mPersonView.setImageBitmap(personBmp);
+            }
+
             int[] face_info = mFaceDetector.predict_image(personBmp);
             tsEnd = System.currentTimeMillis();
 
@@ -462,14 +483,30 @@ public class Detection {
             }
             personInfo.put("faceNum",num);
             if(num > 0){
-
                 String faceStyle = calcFaceStyle(face_info);
                 Log.d(TAG,"Face style is "+faceStyle);
                 RectF faceRectF = getFaceRectF(face_info);
 
+                tsStart = System.currentTimeMillis();
+                Bitmap resizedPersonBmp = mMotionDetection.resizeBmp(personBmp,personBmp.getWidth()/4,personBmp.getHeight()/4);
+                List<VisionDetRet> results = mFaceDet.detect(resizedPersonBmp);
+                if (results.size() != 0) {
+                    Log.v(TAG,"face detection got face (FD DLIB) ");
+                    for (final VisionDetRet ret : results) {
+
+                        Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
+                    }
+                }
+                tsEnd = System.currentTimeMillis();
+
+                Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
+
                 face_num+=num;
                 Bitmap faceBmp = getCropBitmapByCPU(personBmp,faceRectF);
                 Bitmap resizedBmp = mMotionDetection.resizeBmp(faceBmp,FACE_SAVING_WIDTH,FACE_SAVING_HEIGHT);
+
+                mFaceView.setImageBitmap(resizedBmp);
+
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
                         .saveFaceToPicturesFolder(mContext, resizedBmp, "face_");

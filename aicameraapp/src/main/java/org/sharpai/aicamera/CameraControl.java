@@ -57,10 +57,17 @@ public class CameraControl {
     private Activity mActivity;
     private FrameLayout mFramePreview;
     private ImageView mQRCodeImage;
-    public CameraControl(Activity activity,FrameLayout framePreview,ImageView qrCodeView){
+    private ImageView mPersonView;
+    private ImageView mFaceView;
+
+    public CameraControl(Activity activity,FrameLayout framePreview,ImageView qrCodeView,
+                         ImageView detectedPersonView ,ImageView detectedFaceView){
         mActivity = activity;
         mFramePreview = framePreview;
         mQRCodeImage = qrCodeView;
+        mPersonView = detectedPersonView;
+        mFaceView = detectedFaceView;
+
         mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //mActivity.setContentView(R.layout.activity_main);
         if (hasPermission()) {
@@ -131,7 +138,7 @@ public class CameraControl {
         mCamera = getCameraInstance();
 
         // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(mActivity, mCamera, mCameraInfo);
+        mPreview = new CameraPreview(mActivity, mCamera, mCameraInfo,mPersonView,mFaceView);
         //FrameLayout preview = (FrameLayout) mActivity.findViewById(R.id.camera_preview);
         mFramePreview.addView(mPreview);
 

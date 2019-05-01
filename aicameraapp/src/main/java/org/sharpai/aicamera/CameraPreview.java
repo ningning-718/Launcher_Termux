@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.ImageView;
 
 import org.sharpai.aicamera.env.ImageUtils;
 
@@ -39,7 +40,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     private Detection mDetection;
 
-    public CameraPreview(Context context, Camera camera, Camera.CameraInfo cameraInfo) {
+    public CameraPreview(Context context, Camera camera, Camera.CameraInfo cameraInfo,
+                         ImageView detectedPersonView , ImageView detectedFaceView) {
         super(context);
         mCamera = camera;
         mCameraInfo = cameraInfo;
@@ -54,7 +56,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         mPreviewCallback = new PreviewCallback();
         // mLibyuvCore = new LibyuvCore();
-        mDetection = new Detection(context);
+        mDetection = new Detection(context,detectedPersonView,detectedFaceView);
     }
 
     private void adjustCameraOrientation() {
