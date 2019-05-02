@@ -122,7 +122,12 @@ public class RealtimeRecognition implements MqttCallback {
     }
 
     private void SetOff(){
-        mStatusView.setImageResource(R.drawable.green_off);
+        try{
+            mStatusView.setImageResource(R.drawable.green_off);
+        } catch(Exception e){
+            e.printStackTrace();
+            Log.e(TAG,"Exception in SetOff "+e.toString());
+        }
     }
     private void SetGreen(){
         //Format reference:
