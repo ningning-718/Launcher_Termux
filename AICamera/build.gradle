@@ -1,30 +1,20 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-
-    dependencies {
-        implementation "com.android.support:support-annotations:28.0.0"
-        implementation "com.android.support:support-core-ui:28.0.0"
-        implementation "com.google.zxing:core:3.2.0"
-        implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2"
-        implementation 'com.squareup.picasso:picasso:2.71828'
-        implementation project(":terminal-view")
-        implementation project(":AICamera")
-    }
-
+    buildToolsVersion '28.0.3'
     defaultConfig {
-        applicationId "org.sharpai"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 130
-        versionName "1.3"
+        versionCode 1
+        versionName "1.0"
         renderscriptTargetApi 16
         renderscriptSupportModeEnabled true
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
     }
-
     packagingOptions {
-
         pickFirst 'lib/x86_64/libRSSupport.so'
         pickFirst 'lib/armeabi/libRSSupport.so'
         pickFirst 'lib/x86/libRSSupport.so'
@@ -42,16 +32,17 @@ android {
         pickFirst 'lib/x86/librsjni_androidx.so'
         pickFirst 'lib/armeabi-v7a/librsjni_androidx.so'
         pickFirst 'lib/arm64-v8a/librsjni_androidx.so'
-    }
 
+    }
+    lintOptions {
+        abortOnError false
+    }
     buildTypes {
         release {
-            //minifyEnabled true
-            //shrinkResources true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     aaptOptions {
         noCompress "tflite"
     }
@@ -60,10 +51,26 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs=['libs']
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        url 'https://google.bintray.com/tensorflow'
+    }
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-gpu-experimental'
+    implementation 'com.google.zxing:core:3.2.0'
+    implementation project(':sharpaiLib')
 }
