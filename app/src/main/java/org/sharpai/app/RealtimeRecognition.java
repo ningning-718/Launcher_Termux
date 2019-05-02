@@ -57,6 +57,10 @@ public class RealtimeRecognition implements MqttCallback {
     private Context mContext;
     private Picasso mPicasso;
     private TextView mPersonTextView;
+    private SystemTTS mSystemTTS;
+
+    private long mPreviousTTSMs = 0;
+    private static final long DURATION_BETWEEN_TTS = 30*1000;
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
@@ -89,6 +93,8 @@ public class RealtimeRecognition implements MqttCallback {
         mPersonView = personView;
         mPersonTextView = textView;
         mContext = context;
+
+        mSystemTTS = SystemTTS.getInstance(mContext);
 
         mPicasso = new Picasso
             .Builder(mContext)
@@ -200,6 +206,11 @@ public class RealtimeRecognition implements MqttCallback {
 					}
 
 				}, 2000, 1000);
+
+                if( System.currentTimeMillis()-mPreviousTTSMs >= DURATION_BETWEEN_TTS){
+                    mPreviousTTSMs = System.currentTimeMillis();
+                    mSystemTTS.play("你好");
+                }
 
 			} else if(status.equals("Stranger")){
 				Log.i(TAG,"Stranger");
