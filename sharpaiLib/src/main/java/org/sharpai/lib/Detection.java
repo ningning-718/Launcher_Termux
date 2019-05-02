@@ -97,6 +97,9 @@ public class Detection {
     private int PREVIEW_IMAGE_WIDTH = 1920;
     private int PREVIEW_IMAGE_HEIGHT = 1080;
 
+    private static final int WHOLE_IMAGE_FOR_GIF_WIDTH = 427;
+    private static final int WHOLE_IMAGE_FOR_GIF_HEIGHT = 240;
+
     private static final int FACE_SAVING_WIDTH = 112;
     private static final int FACE_SAVING_HEIGHT = 112;
 
@@ -458,7 +461,15 @@ public class Detection {
         String filename = "";
         File file = null;
         JSONArray detectInfo = new JSONArray();
+        String wholeFilename = null;
 
+        if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA){
+            Bitmap wholeImgForGif = mMotionDetection.resizeBmp(bmp,WHOLE_IMAGE_FOR_GIF_WIDTH,WHOLE_IMAGE_FOR_GIF_HEIGHT);
+
+            File wholeFile = screenshot.getInstance()
+                .saveScreenshotToPicturesFolder(mContext, wholeImgForGif, "gif_frame_");
+            wholeFilename = wholeFile.getAbsolutePath();
+        }
         for(final Classifier.Recognition recognition:result){
 
             tsStart = System.currentTimeMillis();
@@ -479,6 +490,11 @@ public class Detection {
 
             // Start to save person image information
             JSONObject personInfo = new JSONObject();
+
+            if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA){
+                personInfo.put("wholeImagePath",wholeFilename);
+            }
+
             personInfo.put("personLocation",rectf.toShortString());
             tsStart = System.currentTimeMillis();
             file = screenshot.getInstance()
