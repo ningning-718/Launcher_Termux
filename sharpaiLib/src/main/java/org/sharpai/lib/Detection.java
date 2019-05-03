@@ -105,7 +105,7 @@ public class Detection {
 
     private static final int PROCESS_FRAMES_AFTER_MOTION_DETECTED = 3;
 
-    private static final boolean SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA = false;
+    private static final boolean SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA = true;
 
     private FaceDet mFaceDet;
 
@@ -563,7 +563,7 @@ public class Detection {
 
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
-                        .saveFaceToPicturesFolderWithOpenCV(mContext, resizedBmp, "face_");
+                        .saveScreenshotToPicturesFolder(mContext, resizedBmp, "face_");
                 tsEnd = System.currentTimeMillis();
                 Log.d(TAG,"Blurry value of face is "+blurryValue+", saving face into "+faceFile.getAbsolutePath());
 
