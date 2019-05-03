@@ -563,7 +563,7 @@ public class Detection {
 
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
-                        .saveScreenshotToPicturesFolder(mContext, resizedBmp, "face_");
+                        .saveFaceToPicturesFolderWithOpenCV(mContext, resizedBmp, "face_");
                 tsEnd = System.currentTimeMillis();
                 Log.d(TAG,"Blurry value of face is "+blurryValue+", saving face into "+faceFile.getAbsolutePath());
 

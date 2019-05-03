@@ -174,7 +174,7 @@ public class screenshot {
         Utils.bitmapToMat(image, rgba);
         Mat rgb = new Mat();
 
-        Imgproc.cvtColor(rgba, rgb, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(rgba, rgb, Imgproc.COLOR_RGBA2BGR);
 
         Imgcodecs.imwrite(bitmapFile.getAbsolutePath(),rgb);
 
