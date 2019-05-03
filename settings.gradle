@@ -1,1 +1,1 @@
-include ':app', ':terminal-emulator', ':terminal-view', ':openCVLibrary341', ':nativeLib', ':magicfilter', ':rembrandtAndroid', ':easyrs', ':sharpaiLib', ':AICamera', ':dlib'
+include ':app', ':terminal-emulator', ':terminal-view', ':openCVLibrary341', ':nativeLib', ':magicfilter', ':rembrandtAndroid', ':easyrs', ':sharpaiLib', ':AICamera', ':dlib', ':libFaceDetection'

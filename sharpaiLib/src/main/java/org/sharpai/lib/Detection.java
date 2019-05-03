@@ -17,6 +17,9 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.mtcnn_as.FaceDetector;
+
+import org.dp.facedetection.Face;
+import org.dp.facedetection.LibFaceDetection;
 import org.sharpai.lib.detector.Classifier;
 import org.sharpai.lib.detector.Detector;
 import org.sharpai.lib.pim.MotionDetectionRS;
@@ -58,6 +61,8 @@ import elanic.in.rsenhancer.processing.RSImageProcessor;
 import io.github.silvaren.easyrs.tools.Nv21Image;
 
 import static java.lang.Math.abs;
+
+import org.dp.facedetection.LibFaceDetection;
 
 //import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_CANCEL;
 //import static com.arthenica.mobileffmpeg.FFmpeg.RETURN_CODE_SUCCESS;
@@ -112,6 +117,11 @@ public class Detection {
     private static final boolean SHOW_DETECTED_PERSON_FACE_FOR_DEBUG = true;
     private ImageView mPersonView;
     private ImageView mFaceView;
+
+    private LibFaceDetection mLibFaceDetector;
+    private static final int LIB_FACE_DETECTION_MIN_CONFIDENCE = 98;
+    private static final int LIB_FACE_DETECTION_MAX_FRONTAL_ANGLE = 2000;
+
     static {
         if (OpenCVLoader.initDebug()) {
             Log.i(TAG, "OpenCV initialize success");
@@ -165,6 +175,8 @@ public class Detection {
         if(SHOW_DETECTED_PERSON_FACE_FOR_DEBUG){
             mFaceDet = new FaceDet(Constants.getFaceShapeModelPath());
         }
+
+        mLibFaceDetector = new LibFaceDetection();
     }
     class MyCallback implements Handler.Callback {
 
@@ -480,7 +492,7 @@ public class Detection {
 
             if(SHOW_DETECTED_PERSON_FACE_FOR_DEBUG) {
                 mPersonView.setImageBitmap(personBmp);
-                mFaceView.setImageDrawable(null);
+                //mFaceView.setImageDrawable(null);
             }
 
             int[] face_info = mFaceDetector.predict_image(personBmp);
@@ -511,30 +523,6 @@ public class Detection {
             personInfo.put("faceNum",num);
             if(num > 0){
 
-                /*
-                Code for detect/crop face with dlib
-
-                tsStart = System.currentTimeMillis();
-                float ratio = 1;
-                if(personBmp.getWidth() >= 400 ){
-                    ratio = personBmp.getWidth()/400;
-                }
-                Bitmap resizedPersonBmp = mMotionDetection.resizeBmp(personBmp,(int) (personBmp.getWidth()/ratio),(int)(personBmp.getHeight()/ratio));
-                List<VisionDetRet> results = mFaceDet.detect(resizedPersonBmp);
-
-                if(results.size() != 0){
-                    VisionDetRet ret = results.get(0);
-                    Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
-                    RectF dlibFaceRectF = getFaceRectF(ret);
-                    Bitmap faceBmp = getCropBitmapByCPU(resizedPersonBmp,dlibFaceRectF);
-                    Bitmap resizedBmp = mMotionDetection.resizeBmp(faceBmp,FACE_SAVING_WIDTH,FACE_SAVING_HEIGHT);
-
-                    mFaceView.setImageBitmap(resizedBmp);
-                }
-                tsEnd = System.currentTimeMillis();
-                Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
-                */
-
                 RectF faceRectF = getFaceRectF(face_info);
 
                 face_num+=num;
@@ -542,19 +530,51 @@ public class Detection {
                 Bitmap resizedBmp = mMotionDetection.resizeBmp(faceBmp,FACE_SAVING_WIDTH,FACE_SAVING_HEIGHT);
 
                 tsStart = System.currentTimeMillis();
-                List<VisionDetRet> results = mFaceDet.detect(resizedBmp);
-                String faceStyle = "side_face";
-                if(results.size() != 0){
-                    VisionDetRet ret = results.get(0);
-                    Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
+                Face[] faces = mLibFaceDetector.Detect(resizedBmp);
+                boolean goodFace = false;
+                Face frontFace = null;
 
-                    mFaceView.setImageBitmap(resizedBmp);
-                    faceStyle = "front";
+                if(faces != null){
+                    Log.d(TAG,"in face: face length "+faces.length);
+                    for(int i=0;i<faces.length;i++){
+                        Face face = faces[i];
+                        Log.d(TAG,"in face: face confidence "+face.faceConfidence +
+                            " angle "+face.faceAngle+" width "+face.faceRect.width+" height "+
+                            face.faceRect.height);
+
+                        if(face.faceConfidence > LIB_FACE_DETECTION_MIN_CONFIDENCE &&
+                            face.faceAngle == 0){
+                            goodFace = true;
+                            frontFace = face;
+                            break;
+                        }
+                    }
                 }
-                Log.d(TAG,"Face style is "+faceStyle);
                 tsEnd = System.currentTimeMillis();
-                Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
+                Log.v(TAG,"time diff (FD libfacedetection in face) "+(tsEnd-tsStart));
 
+                String faceStyle = "side_face";
+                if(goodFace){
+                    faceStyle = "front";
+                    mFaceView.setImageBitmap(resizedBmp);
+                }
+
+                if(!goodFace){
+                    tsStart = System.currentTimeMillis();
+                    List<VisionDetRet> results = mFaceDet.detect(resizedBmp);
+                    if(results.size() != 0){
+                        VisionDetRet ret = results.get(0);
+                        Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
+
+                        mFaceView.setImageBitmap(resizedBmp);
+                        faceStyle = "front";
+                        goodFace = true;
+                    }
+                    tsEnd = System.currentTimeMillis();
+                    Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
+                }
+
+                Log.d(TAG,"Face style is "+faceStyle);
                 if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == false) {
                     if (faceStyle.equals("side_face")) {
                         continue;

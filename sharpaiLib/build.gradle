@@ -91,6 +91,7 @@ dependencies {
     implementation project(':openCVLibrary341')
     implementation project(':nativeLib')
     implementation project(':dlib')
+    implementation project(':libFaceDetection')
     //implementation project(':OpenCV3.1')
     //implementation project(':mp4compose')
 
