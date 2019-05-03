@@ -463,13 +463,13 @@ public class Detection {
         JSONArray detectInfo = new JSONArray();
         String wholeFilename = null;
 
-        if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA){
+        if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == true){
             Bitmap wholeImgForGif = mMotionDetection.resizeBmp(bmp,WHOLE_IMAGE_FOR_GIF_WIDTH,WHOLE_IMAGE_FOR_GIF_HEIGHT);
-
             File wholeFile = screenshot.getInstance()
                 .saveScreenshotToPicturesFolder(mContext, wholeImgForGif, "gif_frame_");
             wholeFilename = wholeFile.getAbsolutePath();
         }
+
         for(final Classifier.Recognition recognition:result){
 
             tsStart = System.currentTimeMillis();
@@ -495,6 +495,8 @@ public class Detection {
                 personInfo.put("wholeImagePath",wholeFilename);
             }
 
+            personInfo.put("personWidth",rectf.width());
+            personInfo.put("personHeight",rectf.height());
             personInfo.put("personLocation",rectf.toShortString());
             tsStart = System.currentTimeMillis();
             file = screenshot.getInstance()
@@ -561,14 +563,17 @@ public class Detection {
 
                 int blurryValue = calcBitmapBlurry(resizedBmp);
                 File faceFile = screenshot.getInstance()
-                        .saveFaceToPicturesFolder(mContext, resizedBmp, "face_");
+                        .saveFaceToPicturesFolderWithOpenCV(mContext, resizedBmp, "face_");
                 tsEnd = System.currentTimeMillis();
                 Log.d(TAG,"Blurry value of face is "+blurryValue+", saving face into "+faceFile.getAbsolutePath());
 
+                personInfo.put("faceWidth",faceRectF.width());
+                personInfo.put("faceHeight",faceRectF.height());
                 personInfo.put("faceLocation",faceRectF.toShortString());
                 personInfo.put("faceImagePath",faceFile.getAbsolutePath());
                 personInfo.put("faceStyle",faceStyle);
                 personInfo.put("faceBlurry",blurryValue);
+
                 //bitmap.recycle();
                 //bitmap = null;
             } else if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == false) {
@@ -588,12 +593,14 @@ public class Detection {
         }
 
         mLastTaskSentTimestamp = System.currentTimeMillis();
-
-        JSONObject finalObject = new JSONObject();
-        finalObject.put("msg", detectInfo);
-        Log.d(TAG,"Detection information: "+finalObject);
-
         if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == true){
+            JSONObject finalObject = new JSONObject();
+            finalObject.put("msg", detectInfo);
+            finalObject.put("deviceName", "camera_1");
+            finalObject.put("motion", true);
+            finalObject.put("wholeImagePath", wholeFilename);
+
+            Log.d(TAG,"Detection information: "+finalObject);
             mBackgroundHandler.obtainMessage(PROCESS_JSON_ARRAY_MSG, finalObject).sendToTarget();
         }
 
