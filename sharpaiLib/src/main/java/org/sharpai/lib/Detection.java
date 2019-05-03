@@ -119,7 +119,7 @@ public class Detection {
     private ImageView mFaceView;
 
     private LibFaceDetection mLibFaceDetector;
-    private static final int LIB_FACE_DETECTION_MIN_CONFIDENCE = 98;
+    private static final int LIB_FACE_DETECTION_MIN_CONFIDENCE = 90;
     private static final int LIB_FACE_DETECTION_MAX_FRONTAL_ANGLE = 2000;
 
     static {
@@ -531,8 +531,8 @@ public class Detection {
 
                 tsStart = System.currentTimeMillis();
                 Face[] faces = mLibFaceDetector.Detect(resizedBmp);
-                boolean goodFace = false;
-                Face frontFace = null;
+
+                String faceStyle = "side_face";
 
                 if(faces != null){
                     Log.d(TAG,"in face: face length "+faces.length);
@@ -544,8 +544,7 @@ public class Detection {
 
                         if(face.faceConfidence > LIB_FACE_DETECTION_MIN_CONFIDENCE &&
                             face.faceAngle == 0){
-                            goodFace = true;
-                            frontFace = face;
+                            faceStyle = "front";
                             break;
                         }
                     }
@@ -553,28 +552,28 @@ public class Detection {
                 tsEnd = System.currentTimeMillis();
                 Log.v(TAG,"time diff (FD libfacedetection in face) "+(tsEnd-tsStart));
 
-                String faceStyle = "side_face";
-                if(goodFace){
-                    faceStyle = "front";
-                    mFaceView.setImageBitmap(resizedBmp);
-                }
 
-                if(!goodFace){
+                if(!faceStyle.equals("front")){
                     tsStart = System.currentTimeMillis();
                     List<VisionDetRet> results = mFaceDet.detect(resizedBmp);
                     if(results.size() != 0){
                         VisionDetRet ret = results.get(0);
                         Log.d(TAG,"Face result "+faceRectF+" dlib "+ret);
-
-                        mFaceView.setImageBitmap(resizedBmp);
                         faceStyle = "front";
-                        goodFace = true;
                     }
                     tsEnd = System.currentTimeMillis();
                     Log.v(TAG,"time diff (FD Dlib) "+(tsEnd-tsStart));
                 }
 
-                Log.d(TAG,"Face style is "+faceStyle);
+                if(faceStyle.equals("front")){
+                    faceStyle = calcFaceStyle(face_info);
+                }
+                Log.d(TAG,"Final face style is "+faceStyle);
+
+                if(faceStyle.equals("front")){
+                    mFaceView.setImageBitmap(resizedBmp);
+                }
+
                 if(SEND_WITH_FACE_JSON_MESSAGE_TO_DEEPCAMERA == false) {
                     if (faceStyle.equals("side_face")) {
                         continue;
