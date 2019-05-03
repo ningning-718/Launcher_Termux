@@ -17,8 +17,8 @@ android {
         applicationId "org.sharpai"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 141
-        versionName "1.4.1"
+        versionCode 142
+        versionName "1.4.2"
         renderscriptTargetApi 16
         renderscriptSupportModeEnabled true
     }
