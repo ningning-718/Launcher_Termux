@@ -305,42 +305,52 @@ public class RealtimeRecognition implements MqttCallback {
             return;
         }
 
+        String result = "";
         String response = makeRequest("http://127.0.0.1:3380/person_message_unread",json.toString());
         if(response == null){
             Log.d(TAG,"Error of rest post");
             return;
-        } else {
-            Log.v(TAG,"Response of detector is "+response);
-            msg = getMsgFromJson(response);
         }
 
         try {
-            if(msg != null && msg.getString("msg").equals("") == false){
-                mTTSMessageID = msg.getString("_id");
-                mSystemTTS.play(msg.getString("msg"));
-            } else {
+            JSONObject jsonObject = new JSONObject(response);
+            result = jsonObject.getString("result");
+            Log.v(TAG,"Response of detector is "+response);
 
-                if( System.currentTimeMillis()-mPreviousTTSMs >= DURATION_BETWEEN_TTS){
-                    if(mSystemTTS.isSpeaking() != true){
-                        mPreviousTTSMs = System.currentTimeMillis();
-
-                        //String toSpeak = speakToKnownPerson(mainObject);
-                        mSystemTTS.play("你好");
+            if(result.equals("yes")){
+                msg = getMsgFromJson(response);
+                if(msg != null && msg.getString("msg").equals("") == false){
+                    mTTSMessageID = msg.getString("_id");
+                    if(mSystemTTS.isSpeaking() != true) {
+                        mSystemTTS.play(msg.getString("msg"));
+                        return;
+                    }
+                }
+            } else if(result.equals("name")){
+                if(mSystemTTS.isSpeaking() != true){
+                    mPreviousTTSMs = System.currentTimeMillis();
+                    String name = jsonObject.getString("name");
+                    if(name != null && !name.equals("")){
+                        String toPlay = name+",您好";
+                        mSystemTTS.play(toPlay);
+                        Log.d(TAG,"To TTS "+toPlay);
                     }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.d(TAG,"Exception in speakToKnownPerson");
         }
 
         return ;
     }
     private void testForKnowPerson(){
-        String person_id = "15392942339300000";
+        String face_id = "15392942339300000";
 
         JSONObject json = new JSONObject();
         try {
-            json.put("face_id", person_id);
+            //person_id from realtime api is faceId.
+            json.put("person_id", face_id);
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -432,7 +442,6 @@ public class RealtimeRecognition implements MqttCallback {
             }
 
         }, 1000, 6000);
-
 
         /*
         Timer myTimer1 = new Timer();
