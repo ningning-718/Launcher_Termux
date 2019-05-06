@@ -2,12 +2,10 @@ package org.sharpai.app;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,8 +25,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sharpai.termux.R;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -62,6 +67,8 @@ public class RealtimeRecognition implements MqttCallback {
     private long mPreviousTTSMs = 0;
     private static final long DURATION_BETWEEN_TTS = 30*1000;
 
+    private String mTTSMessageID = null;
+
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
             @Override
@@ -94,7 +101,36 @@ public class RealtimeRecognition implements MqttCallback {
         mPersonTextView = textView;
         mContext = context;
 
-        mSystemTTS = SystemTTS.getInstance(mContext);
+        mSystemTTS = SystemTTS.getInstance(mContext,new UtteranceProgressListener() {
+            @Override
+            public void onDone(String utteranceId) {
+                // Log.d("MainActivity", "TTS finished");
+                Log.d(TAG,mTTSMessageID+" speaking done "+utteranceId);
+                if(mTTSMessageID!=null){
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("_id", mTTSMessageID);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    String response = makeRequest("http://127.0.0.1:3380/person_message_done",json.toString());
+                    Log.d(TAG,"Msg read result "+response);
+                    mTTSMessageID = null;
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                Log.d(TAG,mTTSMessageID + "speaking error "+utteranceId);
+            }
+
+            @Override
+            public void onStart(String utteranceId) {
+                Log.d(TAG,mTTSMessageID + "speaking started "+utteranceId);
+            }
+        });
 
         mPicasso = new Picasso
             .Builder(mContext)
@@ -183,7 +219,137 @@ public class RealtimeRecognition implements MqttCallback {
 
 		SetOff();
 	}
+    public static String makeRequest(String uri, String json) {
+        HttpURLConnection urlConnection;
+        String url;
+        String data = json;
+        String result = null;
+        try {
+            //Connect
+            urlConnection = (HttpURLConnection) ((new URL(uri).openConnection()));
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("Accept", "application/json");
+            urlConnection.setRequestMethod("POST");
+            urlConnection.connect();
 
+            //Write
+            OutputStream outputStream = urlConnection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+            writer.write(data);
+            writer.close();
+            outputStream.close();
+
+            //Read
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+
+            String line = null;
+            StringBuilder sb = new StringBuilder();
+
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+
+            bufferedReader.close();
+            result = sb.toString();
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    private JSONObject getMsgFromJson(String str){
+        //{
+        // "result":"yes",
+        // "msg":{
+        //     "_id":"Ncf8tK3rQAdFFSPHz",
+        //     "msg":"波刚才找过你",
+        //     "personId":"78d2e0ea24b1da2ec68b2e66",
+        //     "groupId":"e87a2fa20f1052b659f2decc",
+        //     "isRead":false,
+        //     "createdAt":"2019-05-06T17:44:06.102Z"
+        //   }
+        // }
+
+        JSONObject obj = null;
+        JSONObject msg = null;
+        try {
+            obj = new JSONObject(str);
+            if(!obj.getString("result").equals("yes")){
+                return null;
+            }
+            msg = obj.getJSONObject("msg");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return msg;
+    }
+	private void speakToKnownPerson(JSONObject obj){
+        if(mSystemTTS.isSpeaking()){
+            Log.d(TAG,"is playing can't say anything");
+            return;
+        }
+        String face_id = null;
+        JSONObject json = new JSONObject();
+        JSONObject msg = null;
+        try {
+            // This is caused by long history.
+            face_id = obj.getString("person_id");
+            json.put("face_id", face_id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        String response = makeRequest("http://127.0.0.1:3380/person_message_unread",json.toString());
+        if(response == null){
+            Log.d(TAG,"Error of rest post");
+            return;
+        } else {
+            Log.v(TAG,"Response of detector is "+response);
+            msg = getMsgFromJson(response);
+        }
+
+        try {
+            if(msg != null && msg.getString("msg").equals("") == false){
+                mTTSMessageID = msg.getString("_id");
+                mSystemTTS.play(msg.getString("msg"));
+            } else {
+
+                if( System.currentTimeMillis()-mPreviousTTSMs >= DURATION_BETWEEN_TTS){
+                    if(mSystemTTS.isSpeaking() != true){
+                        mPreviousTTSMs = System.currentTimeMillis();
+
+                        //String toSpeak = speakToKnownPerson(mainObject);
+                        mSystemTTS.play("你好");
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return ;
+    }
+    private void testForKnowPerson(){
+        String person_id = "15392942339300000";
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("face_id", person_id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        speakToKnownPerson(json);
+
+        return;
+    }
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		Log.d(TAG,message.toString());
@@ -198,7 +364,7 @@ public class RealtimeRecognition implements MqttCallback {
 			}
 			if(status.equals("known person")){
 				Log.i(TAG,"known person");
-
+                speakToKnownPerson(mainObject);
                 setKnownPersonImage(getKnownPersonImage(mainObject));
 
 				SetGreen();
@@ -212,10 +378,6 @@ public class RealtimeRecognition implements MqttCallback {
 
 				}, 2000, 1000);
 
-                if( System.currentTimeMillis()-mPreviousTTSMs >= DURATION_BETWEEN_TTS){
-                    mPreviousTTSMs = System.currentTimeMillis();
-                    mSystemTTS.play("你好");
-                }
 
 			} else if(status.equals("Stranger")){
 				Log.i(TAG,"Stranger");
@@ -270,5 +432,17 @@ public class RealtimeRecognition implements MqttCallback {
             }
 
         }, 1000, 6000);
+
+
+        /*
+        Timer myTimer1 = new Timer();
+        myTimer1.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                testForKnowPerson();
+            }
+
+        }, 1000, 6000);
+        */
     }
 }
