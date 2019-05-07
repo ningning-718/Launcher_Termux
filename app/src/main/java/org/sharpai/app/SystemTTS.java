@@ -2,6 +2,7 @@ package org.sharpai.app;
 
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.widget.Toast;
 
 import java.util.Locale;
@@ -20,23 +21,23 @@ public class SystemTTS {
     //是否支持
     private boolean isSupport = true;
 
-    private SystemTTS(Context context) {
+    private SystemTTS(Context context,UtteranceProgressListener utteranceProgressListener) {
         this.mContext = context.getApplicationContext();
         textToSpeech = new TextToSpeech(mContext, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int i) {
                 //textToSpeech的配置
-                init(i);
+                init(i,utteranceProgressListener);
             }
         });
     }
 
 
-    public static SystemTTS getInstance(Context context) {
+    public static SystemTTS getInstance(Context context, UtteranceProgressListener utteranceProgressListener) {
         if (singleton == null) {
             synchronized (SystemTTS.class) {
                 if (singleton == null) {
-                    singleton = new SystemTTS(context);
+                    singleton = new SystemTTS(context,utteranceProgressListener);
                 }
             }
         }
@@ -44,12 +45,13 @@ public class SystemTTS {
     }
 
     //textToSpeech的配置
-    private void init(int i) {
+    private void init(int i,UtteranceProgressListener utteranceProgressListener) {
         if (i == TextToSpeech.SUCCESS) {
             int result = textToSpeech.setLanguage(Locale.CHINESE);
             // 设置音调，值越大声音越尖（女生），值越小则变成男声,1.0是常规
             textToSpeech.setPitch(1.0f);
             textToSpeech.setSpeechRate(1.0f);
+            textToSpeech.setOnUtteranceProgressListener(utteranceProgressListener);
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 //系统不支持中文播报
                 isSupport = false;
@@ -64,10 +66,15 @@ public class SystemTTS {
             return;
         }
         if (textToSpeech != null) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, null, "MsgTTS");
         }
     }
-
+    public boolean isSpeaking(){
+        if(textToSpeech != null){
+            return(textToSpeech.isSpeaking());
+        }
+        return true;
+    }
 
     public void stop() {
         if (textToSpeech != null) {
