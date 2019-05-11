@@ -95,6 +95,7 @@ public class Detection {
 
     private static final int PROCESS_SAVED_IMAGE_MSG = 1002;
     private static final int PROCESS_JSON_ARRAY_MSG = 1003;
+    private static final int PROCESS_KEEP_ALIVE_MSG = 1004;
     private static final int PROCESS_SAVED_IMAGE_MSG_NOTNOW = 2001;
 
     private int DETECTION_IMAGE_WIDTH = 854;
@@ -223,6 +224,30 @@ public class Detection {
                         Log.d(TAG,"Error of rest post");
                     } else {
                         Log.v(TAG,"Response of detector is "+response);
+                    }
+                    break;
+                case PROCESS_KEEP_ALIVE_MSG:
+                    Log.d(TAG, "Processing keep alive");
+                    try {
+                        url = new URL("http://127.0.0.1:3380/camera_keepalive");
+
+                        urlConnection = (HttpURLConnection) url
+                            .openConnection();
+                        int responseCode = urlConnection.getResponseCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            Log.d(TAG, "keep alive success ");
+                        } else {
+                            Log.d(TAG, "keep alive failed ");
+                        }
+                    } catch (Exception e) {
+                        urlConnection = null;
+                        //e.printStackTrace();
+                        Log.v(TAG, "Monitor is not running");
+                    } finally {
+                        if (urlConnection != null) {
+                            urlConnection.disconnect();
+                            return true;
+                        }
                     }
                     break;
                 default:
@@ -626,45 +651,17 @@ public class Detection {
         //VideoActivity.setNumberOfFaces(face_num);
         return face_num;
     }
-    public void doSendDummyTask(Bitmap bmp){
-        String filename = "";
-        File file = null;
-
-        long tsStart = System.currentTimeMillis();
-        RectF rectf = new RectF(0.0f,0.0f,1.0f,1.0f);
-        Log.d(TAG,"dummy recognition rect: "+rectf.toString());
-        Bitmap personBmp = getCropBitmapByCPU(bmp,rectf);
-        try {
-            tsStart = System.currentTimeMillis();
-            file = screenshot.getInstance()
-                    .saveScreenshotToPicturesFolder(mContext, personBmp, "frame_");
-
-            filename = file.getAbsolutePath();
-            long tsEnd = System.currentTimeMillis();
-            Log.v(TAG,"time diff (Save) "+(tsEnd-tsStart));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            //delete all jpg file in Download dir when disk is full
-            deleteAllCapturedPics();
-        }
-        if(filename.equals("")){
-            return;
-        }
-        if(file == null){
-            return;
-        }
-        mBackgroundHandler.obtainMessage(PROCESS_SAVED_IMAGE_MSG, filename).sendToTarget();
+    public void doSendDummyTask(){
+        mBackgroundHandler.obtainMessage(PROCESS_KEEP_ALIVE_MSG).sendToTarget();
 
         return;
     }
-    private void checkIfNeedSendDummyTask(Bitmap bmp){
+    private void checkIfNeedSendDummyTask(){
 
         long tm = System.currentTimeMillis();
         if (tm - mLastTaskSentTimestamp > 30*1000) {
             mLastTaskSentTimestamp = System.currentTimeMillis();
-            doSendDummyTask(bmp);
+            doSendDummyTask();
             Log.d(TAG,"To send dummy task to keep alive for client status");
         }
 
@@ -698,7 +695,7 @@ public class Detection {
                     //VideoActivity.setNumberOfFaces(0);
                     boolean ifChanged = detectObjectChanges(bmp);
                     Log.d(TAG,"Object changed after person leaving: "+ifChanged);
-                    checkIfNeedSendDummyTask(bmp);
+                    checkIfNeedSendDummyTask();
                     if(!ifChanged && mRecording){
                         //FFmpeg.cancel();
                         //String result = FFmpeg.getLastCommandOutput();
@@ -746,7 +743,7 @@ public class Detection {
             }
         }
 
-        checkIfNeedSendDummyTask(bmp);
+        checkIfNeedSendDummyTask();
 
         return;
     }
