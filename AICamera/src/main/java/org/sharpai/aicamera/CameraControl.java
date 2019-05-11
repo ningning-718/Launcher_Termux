@@ -90,6 +90,16 @@ public class CameraControl {
         }
         mCameraInfo = new Camera.CameraInfo();
         Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_FRONT, mCameraInfo);
+
+        Camera.Parameters camParams = c.getParameters();
+
+        camParams.set("iso-speed", 400);
+        c.setParameters(camParams);
+
+        /*camParams = c.getParameters();
+        String pams = camParams.flatten();
+        String supportedIsoValues = camParams.get("iso-values");*/
+
         return c; // returns null if camera is unavailable
     }
 
