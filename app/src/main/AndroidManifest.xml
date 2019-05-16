@@ -62,6 +62,10 @@
             android:label="@string/activity_name_detection">
         </activity>
 
+        <activity android:name="org.sharpai.app.WebActivity"
+            android:screenOrientation="landscape">
+        </activity>
+
         <activity
             android:name="org.sharpai.app.TermuxHelpActivity"
             android:exported="false"

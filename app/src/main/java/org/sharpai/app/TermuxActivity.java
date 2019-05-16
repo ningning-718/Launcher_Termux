@@ -490,6 +490,16 @@ public final class TermuxActivity extends Activity implements ServiceConnection 
         });
         buttonStart.setVisibility(View.GONE);
 
+        Button buttonWeb = findViewById(R.id.btn_webview);
+        buttonWeb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                startActivity(new Intent(TermuxActivity.this, WebActivity.class));
+            }
+        });
+
+
         ViewGroup.LayoutParams layoutParams = viewPager.getLayoutParams();
         layoutParams.height = layoutParams.height * mSettings.mExtraKeys.length;
         viewPager.setLayoutParams(layoutParams);
@@ -1071,11 +1081,12 @@ dialog.cancel();
     void addNewSession(boolean failSafe, String sessionName) {
         String homePath = HOME_PATH;
         File roSerialFile = new File(homePath,".ro_serialno");
-        if(!roSerialFile.exists()){
+        String serialNo = getUniqueSerialNO();
+        if(!roSerialFile.exists() && !TextUtils.isEmpty(serialNo)){
             FileOutputStream stream = null;
             try {
                 stream = new FileOutputStream(roSerialFile);
-                stream.write(getUniqueSerialNO().getBytes());
+                stream.write(serialNo.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

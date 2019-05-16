@@ -173,4 +173,14 @@
         android:layout_marginRight="30dp"
         android:text="@string/button_start_text" />
 
+    <Button
+        android:id="@+id/btn_webview"
+        style="@android:style/Widget.DeviceDefault.Light.Button.Inset"
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="170dp"
+        android:layout_marginRight="30dp"
+        android:text="@string/button_webview" />
+
 </RelativeLayout>

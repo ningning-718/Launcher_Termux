@@ -57,6 +57,7 @@
       \nThis application is designed for evaluating DeepCamera platform.</string>
   <string name="button_stop_text">Stop</string>
   <string name="button_start_text">Start</string>
+  <string name="button_webview">Web</string>
   <string name="dialog_yes">Yes</string>
   <string name="dialog_no">No</string>
   <string name="dialog_confirm">Confirm</string>
